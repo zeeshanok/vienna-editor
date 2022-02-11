@@ -1,36 +1,41 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vienna_editor/blocs/window_tab_bloc.dart';
-import 'package:vienna_editor/models/window_tab_model.dart';
+import 'package:vienna_editor/blocs/window_state_bloc.dart';
+import 'package:vienna_editor/pages/home.dart';
 
 class MainSection extends StatelessWidget {
   const MainSection({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<WindowTabCubit, List<WindowTabModel>>(
-      builder: (context, state) {
-        final sIndex = context.read<WindowTabCubit>().selectedIndex;
-        return buildTab(state[sIndex], sIndex);
+    return Navigator(
+      initialRoute: '/home',
+      onGenerateRoute: (settings) {
+        final name = settings.name;
+        switch (name) {
+          case "/home":
+            return PageRouteBuilder(
+                pageBuilder: (context, _, __) => const HomePage());
+
+          // case "/createProject":
+          //   return pageRoute(this, const CreateProjectPage());
+        }
       },
     );
   }
 
-  Widget buildTab(WindowTabModel tab, int i) {
-    if (tab.kind == WindowTabKind.newTab) {
-      return buildNewTab(i);
+  Widget buildTab(WindowState tab) {
+    if (tab is RegularWindowState) {
+      return buildRegularTab(tab.title);
     } else {
-      return buildRegularTab(tab);
+      return buildNewTab();
     }
   }
 
-  Widget buildNewTab(int i) {
-    return Center(child: Text("new tab $i"));
+  Widget buildNewTab() {
+    return const HomePage();
   }
 
-  Widget buildRegularTab(WindowTabModel tab) {
-    return const Text("tab");
+  Widget buildRegularTab(String title) {
+    return Text(title);
   }
 }

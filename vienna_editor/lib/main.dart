@@ -1,6 +1,7 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart' as bits;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vienna_editor/blocs/window_state_bloc.dart';
 import 'package:vienna_editor/blocs/window_tab_bloc.dart';
 import 'package:vienna_editor/consts.dart';
 import 'package:vienna_editor/widgets/main_section.dart';
@@ -17,14 +18,17 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => WindowTabCubit(),
+      create: (context) => WindowCubit(),
       child: MaterialApp(
         themeMode: ThemeMode.dark,
         theme: defaultTheme,
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           body: Column(
-            children: const [TitleBar(), Expanded(child: MainSection())],
+            children: [
+              if (isDesktop()) const TitleBar(),
+              Expanded(child: MainSection())
+            ],
           ),
         ),
       ),
