@@ -65,37 +65,38 @@ class DefaultPageRoute extends PageRouteBuilder {
   final Widget exitPage, enterPage;
   DefaultPageRoute({required this.exitPage, required this.enterPage})
       : super(
-            opaque: true,
-            transitionDuration: const Duration(milliseconds: 450),
-            reverseTransitionDuration: const Duration(milliseconds: 300),
-            pageBuilder: (context, _, __) => enterPage,
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) => Container(
-                    color: Theme.of(context).colorScheme.background,
-                    child: Stack(
-                      children: [
-                        SlideTransition(
-                          position: CurvedAnimation(
-                                  curve: Curves.easeInOutCubicEmphasized,
-                                  reverseCurve:
-                                      Curves.easeInOutCubicEmphasized.flipped,
-                                  parent: animation)
-                              .drive(Tween(
-                                  begin: const Offset(0, 0),
-                                  end: const Offset(-1, 0))),
-                          child: exitPage,
-                        ),
-                        SlideTransition(
-                          position: CurvedAnimation(
-                                  curve: Curves.easeInOutCubicEmphasized,
-                                  reverseCurve:
-                                      Curves.easeInOutCubicEmphasized.flipped,
-                                  parent: animation)
-                              .drive(Tween(
-                                  begin: const Offset(1, 0),
-                                  end: const Offset(0, 0))),
-                          child: enterPage,
-                        )
-                      ],
-                    )));
+          opaque: true,
+          transitionDuration: const Duration(milliseconds: 450),
+          reverseTransitionDuration: const Duration(milliseconds: 300),
+          pageBuilder: (context, _, __) => enterPage,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              IgnorePointer(
+            ignoring: !animation.isCompleted,
+            child: Container(
+              color: Theme.of(context).colorScheme.background,
+              child: Stack(
+                children: [
+                  SlideTransition(
+                    position: CurvedAnimation(
+                      curve: Curves.easeInOutCubicEmphasized,
+                      reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
+                      parent: animation,
+                    ).drive(Tween(
+                        begin: const Offset(0, 0), end: const Offset(-1, 0))),
+                    child: exitPage,
+                  ),
+                  SlideTransition(
+                    position: CurvedAnimation(
+                      curve: Curves.easeInOutCubicEmphasized,
+                      reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
+                      parent: animation,
+                    ).drive(Tween(
+                        begin: const Offset(1, 0), end: const Offset(0, 0))),
+                    child: child,
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
 }

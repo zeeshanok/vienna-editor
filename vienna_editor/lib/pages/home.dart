@@ -53,15 +53,17 @@ class HomePage extends HookWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        children: const [
-                          Icon(
+                        children: [
+                          const Icon(
                             Icons.add,
                             size: 60,
                           ),
                           Text(
-                            "Drag and drop files or click to add files",
+                            isDesktop()
+                                ? "Drag and drop files or click to add files"
+                                : "Tap to add files",
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 18),
+                            style: const TextStyle(fontSize: 18),
                           ),
                         ],
                       ),

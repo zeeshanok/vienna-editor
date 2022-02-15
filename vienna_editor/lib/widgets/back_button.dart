@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vienna_editor/consts.dart';
 
 final _style = ButtonStyle(
   alignment: Alignment.center,
@@ -15,7 +16,10 @@ class PaddedBackButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: () => Navigator.of(context).pop(),
       style: _style.copyWith(
-          minimumSize: MaterialStateProperty.all(const Size(60, 60))),
+        minimumSize: MaterialStateProperty.all(
+          Size.square(isDesktop() ? 60 : 45),
+        ),
+      ),
       child: const Icon(Icons.arrow_back),
     );
   }

@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:vienna_editor/blocs/window_state_bloc.dart';
 import 'package:vienna_editor/pages/home.dart';
 
 class MainSection extends StatelessWidget {
-  const MainSection({Key? key}) : super(key: key);
+  MainSection({Key? key}) : super(key: key);
+
+  final navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      initialRoute: '/home',
-      onGenerateRoute: (settings) {
-        final name = settings.name;
-        switch (name) {
-          case "/home":
-            return PageRouteBuilder(
-                pageBuilder: (context, _, __) => const HomePage());
-
-          // case "/createProject":
-          //   return pageRoute(this, const CreateProjectPage());
-        }
+    return WillPopScope(
+      onWillPop: () async {
+        await navigatorKey.currentState?.maybePop();
+        return false;
       },
+      child: Navigator(
+        initialRoute: '/',
+        key: navigatorKey,
+        onGenerateRoute: (settings) {
+          final name = settings.name;
+          switch (name) {
+            case "/":
+              return PageRouteBuilder(
+                  pageBuilder: (context, _, __) => const HomePage());
+          }
+        },
+      ),
     );
   }
 
