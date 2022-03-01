@@ -3,6 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 const backgroundColor = Color(0xFF1D1D1D);
+const secondaryBackgroundColor = Color(0xFF303030);
+const defaultEnabledBorderColor = Color(0xFF7D7D7D);
+final globalNavigatorKey = GlobalKey<NavigatorState>();
+
 final buttonStyle = ButtonStyle(
   splashFactory: NoSplash.splashFactory,
   elevation: MaterialStateProperty.all(0),
@@ -21,13 +25,19 @@ final defaultTheme = ThemeData(
   backgroundColor: backgroundColor,
   scaffoldBackgroundColor: backgroundColor,
   textButtonTheme: TextButtonThemeData(style: buttonStyle),
-  elevatedButtonTheme: ElevatedButtonThemeData(style: buttonStyle),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+      style: buttonStyle.copyWith(
+    overlayColor:
+        MaterialStateProperty.all(const Color.fromARGB(33, 255, 255, 255)),
+    padding: MaterialStateProperty.all(const EdgeInsets.all(16)),
+  )),
   outlinedButtonTheme: OutlinedButtonThemeData(style: buttonStyle),
   buttonTheme: const ButtonThemeData(splashColor: Colors.transparent),
   inputDecorationTheme: InputDecorationTheme(
+    floatingLabelBehavior: FloatingLabelBehavior.always,
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(5),
-      borderSide: const BorderSide(color: Color(0xFF7D7D7D), width: 2),
+      borderSide: const BorderSide(color: defaultEnabledBorderColor, width: 2),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(5),
@@ -65,38 +75,42 @@ class DefaultPageRoute extends PageRouteBuilder {
   final Widget exitPage, enterPage;
   DefaultPageRoute({required this.exitPage, required this.enterPage})
       : super(
-          opaque: true,
+          opaque: false,
           transitionDuration: const Duration(milliseconds: 450),
-          reverseTransitionDuration: const Duration(milliseconds: 300),
+          reverseTransitionDuration: const Duration(milliseconds: 120),
           pageBuilder: (context, _, __) => enterPage,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-              IgnorePointer(
-            ignoring: !animation.isCompleted,
-            child: Container(
-              color: Theme.of(context).colorScheme.background,
-              child: Stack(
-                children: [
-                  SlideTransition(
-                    position: CurvedAnimation(
-                      curve: Curves.easeInOutCubicEmphasized,
-                      reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
-                      parent: animation,
-                    ).drive(Tween(
-                        begin: const Offset(0, 0), end: const Offset(-1, 0))),
-                    child: exitPage,
-                  ),
-                  SlideTransition(
-                    position: CurvedAnimation(
-                      curve: Curves.easeInOutCubicEmphasized,
-                      reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
-                      parent: animation,
-                    ).drive(Tween(
-                        begin: const Offset(1, 0), end: const Offset(0, 0))),
-                    child: child,
-                  )
-                ],
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final anim = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOutCubicEmphasized,
+              reverseCurve: Curves.easeOutExpo,
+            );
+            // if (!animation.isCompleted)
+            //   SlideTransition(
+            //     position: CurvedAnimation(
+            //       curve: Curves.easeInOutCubicEmphasized,
+            //       reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
+            //       parent: animation,
+            //     ).drive(Tween(
+            //         begin: const Offset(0, 0), end: const Offset(-1, 0))),
+            //     child: exitPage,
+            //   ),
+
+            // position: CurvedAnimation(
+            //   curve: Curves.easeInOutCubicEmphasized,
+            //   reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
+            //   parent: animation,
+            // ).drive(Tween(
+            //     begin: const Offset(1, 0), end: const Offset(0, 0))),
+            return FadeTransition(
+              opacity: anim,
+              child: ScaleTransition(
+                scale: anim.drive(Tween(begin: 1.15, end: 1)),
+                child: child,
               ),
-            ),
-          ),
+            );
+          },
         );
 }
+
+bool inRange(num x, num l, num h) => l <= x && x <= h;

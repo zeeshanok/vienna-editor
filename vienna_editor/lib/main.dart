@@ -2,15 +2,16 @@ import 'package:bitsdojo_window/bitsdojo_window.dart' as bits;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vienna_editor/blocs/canvas_state_bloc.dart';
 import 'package:vienna_editor/blocs/window_state_bloc.dart';
-import 'package:vienna_editor/blocs/window_tab_bloc.dart';
 import 'package:vienna_editor/consts.dart';
+import 'package:vienna_editor/pages/home.dart';
 import 'package:vienna_editor/widgets/main_section.dart';
 import 'package:vienna_editor/widgets/responsive_builder.dart';
 import 'package:vienna_editor/widgets/window/titlebar.dart';
 
 void main() {
-  runApp(const App());
+  runApp(const NewApp());
   doAfterLaunchTasks();
 }
 
@@ -37,6 +38,47 @@ class App extends StatelessWidget {
             ),
           ),
         ));
+  }
+}
+
+class NewApp extends StatelessWidget {
+  const NewApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => WindowCubit()),
+        BlocProvider(create: (context) => CanvasCubit()),
+      ],
+      child: MaterialApp(
+        themeMode: ThemeMode.dark,
+        theme: defaultTheme,
+        debugShowCheckedModeBanner: false,
+        navigatorKey: globalNavigatorKey,
+        builder: (context, child) => ResponsiveBuilder(
+          mobileBuilder: (context, child) => child!,
+          desktopBuilder: (context, child) => Container(
+            color: defaultTheme.colorScheme.background,
+            child: Column(
+              children: [
+                const Material(
+                  child: TitleBar(),
+                  color: Colors.transparent,
+                ),
+                Expanded(
+                  child: ClipRect(
+                    child: child!,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          child: child,
+        ),
+        home: const HomePage(),
+      ),
+    );
   }
 }
 

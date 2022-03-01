@@ -52,6 +52,7 @@ class VectorFormField extends CustomFormField<List<num?>> {
 
 class VectorFieldInfo {
   final String placeholder, suffix;
+  final num? initialValue;
 
-  VectorFieldInfo(this.placeholder, this.suffix);
+  const VectorFieldInfo(this.placeholder, this.suffix, [this.initialValue]);
 }

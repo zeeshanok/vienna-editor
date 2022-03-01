@@ -1,6 +1,8 @@
 import 'package:flextras/flextras.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:vienna_editor/consts.dart';
 
 class ColorPickerSVGradient extends StatelessWidget {
   const ColorPickerSVGradient({
@@ -183,15 +185,14 @@ class ColorPickerHSliderThumbPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final pos = hue / 360 * size.width;
     final c = Offset(pos, size.height / 2);
-    final r = size.shortestSide * 0.75;
     canvas.drawCircle(
       c,
-      r,
+      8,
       Paint()..color = thumbColor,
     );
     canvas.drawCircle(
       c,
-      r - 2,
+      6,
       Paint()..color = HSVColor.fromAHSV(1, hue, 1, 1).toColor(),
     );
   }
@@ -215,28 +216,65 @@ class ColorEditor extends HookWidget {
   final bool allowOpacity;
   final double height;
 
-  String getHex(HSVColor color) => color.toColor().value.toRadixString(16);
+  String getHex(HSVColor c) =>
+      c.toColor().value.toRadixString(16).substring(2).toUpperCase();
+  String getHsv(HSVColor c) =>
+      "${c.hue.round()}°, ${(c.saturation * 100).round()}%, "
+      "${(c.value * 100).round()}%";
+
+  void Function(String) _onColorChange(bool isHsv) => isHsv
+      ? (text) {
+          final s = text.replaceAll(" ", "");
+          final reg = RegExp(r"(\d+)°?,(\d+)%?,(\d+)%?");
+          final match = reg.firstMatch(s);
+          if (match != null) {
+            final h = int.parse(match.group(1)!).toDouble();
+            final s = int.parse(match.group(2)!) / 100;
+            final v = int.parse(match.group(3)!) / 100;
+            if (inRange(h, 0, 360) && inRange(s, 0, 1) && inRange(v, 0, 1)) {
+              onChanged(
+                HSVColor.fromAHSV(1, h, s, v),
+              );
+            }
+          }
+        }
+      : (text) {
+          final parsed = int.tryParse(text, radix: 16);
+          if (parsed != null && text.length == 6) {
+            onChanged(HSVColor.fromColor(Color(0xFF000000 | parsed)));
+          }
+        };
+
+  void saveSelection(TextEditingController controller, Function() f) {
+    final s = controller.selection;
+    f();
+    controller.selection = s;
+  }
 
   @override
   Widget build(BuildContext context) {
     const decor =
         InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.always);
     final hexController = useTextEditingController(text: getHex(color));
-    final hController = useTextEditingController(text: "${color.hue.round()}");
-    final sController =
-        useTextEditingController(text: "${(color.saturation * 100).round()}");
-    final vController =
-        useTextEditingController(text: "${(color.value * 100).round()}");
+    final hsvController = useTextEditingController(text: getHsv(color));
+    final hexNode = useFocusNode();
+    final hsvNode = useFocusNode();
 
     useValueChanged<HSVColor, void>(color, (_, __) {
-      hexController.text = getHex(color);
-      hController.text = "${color.hue.round()}";
-      sController.text = "${(color.saturation * 100).round()}";
-      vController.text = "${(color.value * 100).round()}";
+      SchedulerBinding.instance?.addPostFrameCallback((timeStamp) {
+        if (!hexNode.hasFocus) {
+          saveSelection(
+              hexController, () => hexController.text = getHex(color));
+        }
+        if (!hsvNode.hasFocus) {
+          saveSelection(
+              hsvController, () => hsvController.text = getHsv(color));
+        }
+      });
     });
 
     return Padding(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: SeparatedColumn(
         separatorBuilder: () => const SizedBox(height: 14),
         children: [
@@ -251,7 +289,7 @@ class ColorEditor extends HookWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Expanded(
                 flex: 4,
                 child: ColorPickerSVGradient(
@@ -272,40 +310,27 @@ class ColorEditor extends HookWidget {
               color.value,
             )),
           ),
-          SeparatedColumn(
-            separatorBuilder: () => const SizedBox(height: 8),
+          SeparatedRow(
+            separatorBuilder: () => const SizedBox(width: 8),
             children: [
-              TextFormField(
-                textInputAction: TextInputAction.next,
-                controller: hexController,
-                decoration: decor.copyWith(labelText: "HEX", prefixText: "#"),
+              Expanded(
+                child: TextFormField(
+                  textInputAction: TextInputAction.next,
+                  controller: hexController,
+                  focusNode: hexNode,
+                  decoration: decor.copyWith(labelText: "HEX", prefixText: "#"),
+                  onChanged: _onColorChange(false),
+                ),
               ),
-              SeparatedRow(
-                separatorBuilder: () => const SizedBox(width: 4),
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      textInputAction: TextInputAction.next,
-                      controller: hController,
-                      decoration: decor.copyWith(labelText: "H"),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextFormField(
-                      textInputAction: TextInputAction.next,
-                      controller: sController,
-                      decoration: decor.copyWith(labelText: "S"),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextFormField(
-                      textInputAction: TextInputAction.next,
-                      controller: vController,
-                      decoration: decor.copyWith(labelText: "V"),
-                    ),
-                  ),
-                ],
-              ),
+              Expanded(
+                child: TextFormField(
+                  textInputAction: TextInputAction.next,
+                  decoration: decor.copyWith(labelText: "HSV"),
+                  controller: hsvController,
+                  focusNode: hsvNode,
+                  onChanged: _onColorChange(true),
+                ),
+              )
             ],
           )
         ],

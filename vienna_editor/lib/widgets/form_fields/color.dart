@@ -17,7 +17,6 @@ class ColorFormField extends CustomFormField<Color> {
 
   @override
   Color get value {
-    // debugPrint(_color.toString());
     return _color.toColor();
   }
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:vienna_editor/blocs/window_state_bloc.dart';
 import 'package:vienna_editor/pages/home.dart';
 
@@ -11,10 +10,8 @@ class MainSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        await navigatorKey.currentState?.maybePop();
-        return false;
-      },
+      onWillPop: () async =>
+          !(await navigatorKey.currentState?.maybePop() ?? false),
       child: Navigator(
         initialRoute: '/',
         key: navigatorKey,
@@ -25,6 +22,7 @@ class MainSection extends StatelessWidget {
               return PageRouteBuilder(
                   pageBuilder: (context, _, __) => const HomePage());
           }
+          return null;
         },
       ),
     );
