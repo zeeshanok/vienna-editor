@@ -37,6 +37,5 @@ class Collapsible extends HookWidget {
       ),
       child: child,
     );
-    ;
   }
 }

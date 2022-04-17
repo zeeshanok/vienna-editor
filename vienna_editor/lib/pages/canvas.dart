@@ -22,7 +22,7 @@ class CanvasPage extends HookWidget {
           Collapsible(
             isCollapsed: leftCollapsed.value,
             axisAlignment: 1,
-            child: Container(
+            child: const SizedBox(
               width: 60,
               child: Icon(Icons.ac_unit),
             ),
@@ -49,7 +49,7 @@ class CanvasPage extends HookWidget {
                       margin: const EdgeInsets.all(14),
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(
                             color: Color.fromARGB(96, 0, 0, 0),
                             spreadRadius: 1,
