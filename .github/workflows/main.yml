@@ -24,7 +24,9 @@ jobs:
           flutter pub get
       
       - name: Build apk
-        run: flutter build apk --release --split-per-abi
+        run: |
+          cd vienna_editor
+          flutter build apk --release --split-per-abi
 
       - name: Archive build
         uses: actions/upload-artifact@v2
