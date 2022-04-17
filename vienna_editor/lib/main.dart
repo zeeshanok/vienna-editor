@@ -57,7 +57,7 @@ class NewApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         navigatorKey: globalNavigatorKey,
         builder: (context, child) => ResponsiveBuilder(
-          mobileBuilder: (context, child) => child!,
+          mobileBuilder: (context, child) => SafeArea(child: child!),
           desktopBuilder: (context, child) => Container(
             color: defaultTheme.colorScheme.background,
             child: Column(
