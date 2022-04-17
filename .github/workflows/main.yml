@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: "beta"
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+
+      - name: Get dependencies
+        run: |
+          cd vienna_editor
+          flutter pub get
+      
+      - name: Build apk
+        run: flutter build apk --release --split-per-abi
+
+      - name: Archive build
+        uses: actions/upload-artifact@v2
+        with:
+          name: vienna_editor
+          path: vienna_editor/build/app/outputs/apk/release
+          retention-days: 5
+
+      - name: Archive arm64 build
+        uses: actions/upload-artifact@v2
+        with:
+          name: vienna_editor
+          path: vienna_editor/build/app/outputs/apk/release/app-arm64-v8a-release.apk
+          retention-days: 5
